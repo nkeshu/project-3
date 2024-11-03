@@ -1,6 +1,7 @@
 // DSString.cpp
 
 #include "DSString.h"
+#include <vector>
 #include <cctype> // For std::tolower
 
 // Helper function to compute the length of a C-string
@@ -135,32 +136,32 @@ DSString DSString::operator+(const DSString &other) const {
 }
 
 // Equality operator
-bool DSString::operator==(const DSString &other) const {
+bool DSString::operator==(const DSString &other) const noexcept {
     return my_strcmp(data, other.data) == 0;
 }
 
 // Less than operator
-bool DSString::operator<(const DSString &other) const {
+bool DSString::operator<(const DSString &other) const noexcept{
     return my_strcmp(data, other.data) < 0;
 }
 
 // Greater than operator
-bool DSString::operator>(const DSString &other) const {
+bool DSString::operator>(const DSString &other) const noexcept{
     return my_strcmp(data, other.data) > 0;
 }
 
 // Not equal operator
-bool DSString::operator!=(const DSString &other) const {
+bool DSString::operator!=(const DSString &other) const noexcept{
     return !(*this == other);
 }
 
 // Less than or equal to operator
-bool DSString::operator<=(const DSString &other) const {
+bool DSString::operator<=(const DSString &other) const noexcept{
     return !(*this > other);
 }
 
 // Greater than or equal to operator
-bool DSString::operator>=(const DSString &other) const {
+bool DSString::operator>=(const DSString &other) const noexcept{
     return !(*this < other);
 }
 
@@ -192,7 +193,7 @@ DSString DSString::toLower() const {
 }
 
 // Returns a C-string representation
-const char *DSString::c_str() const {
+const char *DSString::c_str() const noexcept{
     return data;
 }
 
@@ -200,4 +201,35 @@ const char *DSString::c_str() const {
 std::ostream &operator<<(std::ostream &os, const DSString &str) {
     os << str.data;
     return os;
+}
+bool isDelimiter(char c) {
+    return std::isspace(static_cast<unsigned char>(c)) || std::ispunct(static_cast<unsigned char>(c));
+}
+
+std::vector<DSString> DSString::split() const {
+    std::vector<DSString> tokens;
+    size_t i = 0;
+
+    while (i < len) {
+        // Skip leading delimiters
+        while (i < len && isDelimiter(data[i])) {
+            ++i;
+        }
+
+        // Start of a token
+        size_t start = i;
+
+        // Find the end of the token
+        while (i < len && !isDelimiter(data[i])) {
+            ++i;
+        }
+
+        // Extract the token if any
+        if (start < i) {
+            DSString token = substring(start, i - start);
+            tokens.push_back(token);
+        }
+    }
+
+    return tokens;
 }
