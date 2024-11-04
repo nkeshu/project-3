@@ -17,6 +17,7 @@ private:
     // Map to store predictions
     // Key: tweet ID (DSString), Value: predicted sentiment (int)
     std::unordered_map<DSString, int> predictions;
+    void parseCSVLine(const std::string& line, std::vector<std::string>& fields);
 
 public:
     // Constructor
@@ -30,6 +31,7 @@ public:
 
     // Evaluate predictions against the ground truth and write accuracy and errors to accuracyFile
     void evaluatePredictions(const std::string& groundTruthFile, const std::string& accuracyFile);
+    void testParseCSVLine();
 };
 
 #endif // SENTIMENTCLASSIFIER_H
