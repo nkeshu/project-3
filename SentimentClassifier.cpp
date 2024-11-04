@@ -66,44 +66,90 @@ void SentimentClassifier::train(const std::string &trainFile)
     }
 
     std::string line;
+    size_t lineNumber = 0; // Keep track of the line number for debugging
+
+    // Skip the header line
+    if (std::getline(infile, line))
+    {
+        lineNumber++;
+        // Check if the line contains non-numeric sentiment
+        std::vector<std::string> fields;
+        parseCSVLine(line, fields);
+        if (!fields.empty() && fields[0] == "Sentiment")
+        {
+            std::cout << "Skipping header line in training data." << std::endl;
+        }
+        else
+        {
+            // If no header, reset the stream to the beginning
+            infile.clear();
+            infile.seekg(0, std::ios::beg);
+            lineNumber = 0;
+        }
+    }
+
     // Read each line from the file
     while (std::getline(infile, line))
     {
+        lineNumber++;
         std::vector<std::string> fields;
         parseCSVLine(line, fields);
 
         // Ensure there are at least 6 fields
         if (fields.size() < 6)
         {
+            std::cerr << "Skipping line " << lineNumber << ": Not enough fields." << std::endl;
             continue; // Skip invalid lines
         }
 
-        // Extract sentiment and tweet text
-        int sentiment = std::stoi(fields[0]);
-        DSString tweetText(fields[5].c_str());
-
-        // Convert tweet text to lowercase
-        tweetText = tweetText.toLower();
-
-        // Tokenize the tweet
-        std::vector<DSString> words = tweetText.split();
-
-        // Update word frequencies
-        for (const DSString &word : words)
+        // Debugging output: Print the contents of fields[0]
+        std::string sentimentStr = fields[0];
+        try
         {
-            if (sentiment == 4)
+            int sentiment = std::stoi(sentimentStr);
+            // Proceed only if sentiment is 0 or 4
+            if (sentiment != 0 && sentiment != 4)
             {
-                wordFreq[word].first++; // Increment positive count
+                std::cerr << "Skipping line " << lineNumber << ": Invalid sentiment value (" << sentiment << ")." << std::endl;
+                continue;
             }
-            else if (sentiment == 0)
+
+            DSString tweetText(fields[5].c_str());
+
+            // Convert tweet text to lowercase
+            tweetText = tweetText.toLower();
+
+            // Tokenize the tweet
+            std::vector<DSString> words = tweetText.split();
+
+            // Update word frequencies
+            for (const DSString &word : words)
             {
-                wordFreq[word].second++; // Increment negative count
+                if (sentiment == 4)
+                {
+                    wordFreq[word].first++; // Increment positive count
+                }
+                else if (sentiment == 0)
+                {
+                    wordFreq[word].second++; // Increment negative count
+                }
             }
+        }
+        catch (const std::invalid_argument &e)
+        {
+            std::cerr << "Invalid argument on line " << lineNumber << ": Cannot convert sentiment '" << sentimentStr << "' to int." << std::endl;
+            continue;
+        }
+        catch (const std::out_of_range &e)
+        {
+            std::cerr << "Out of range error on line " << lineNumber << ": Sentiment '" << sentimentStr << "' is out of int range." << std::endl;
+            continue;
         }
     }
 
     infile.close();
 }
+
 
 
 // Predict sentiments for the test data and write results to resultFile
@@ -126,15 +172,38 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
     }
 
     std::string line;
+    size_t lineNumber = 0;
+
+    // Skip the header line if present
+    if (std::getline(infile, line))
+    {
+        lineNumber++;
+        std::vector<std::string> fields;
+        parseCSVLine(line, fields);
+        if (!fields.empty() && (fields[0] == "TweetID" || fields[0] == "Id"))
+        {
+            std::cout << "Skipping header line in test data." << std::endl;
+        }
+        else
+        {
+            // If no header, reset the stream to the beginning
+            infile.clear();
+            infile.seekg(0, std::ios::beg);
+            lineNumber = 0;
+        }
+    }
+
     // Read each line from the file
     while (std::getline(infile, line))
     {
+        lineNumber++;
         std::vector<std::string> fields;
         parseCSVLine(line, fields);
 
         // Ensure there are at least 5 fields (test data has no sentiment column)
         if (fields.size() < 5)
         {
+            std::cerr << "Skipping line " << lineNumber << ": Not enough fields." << std::endl;
             continue; // Skip invalid lines
         }
 
@@ -179,6 +248,7 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
 }
 
 
+
 // Evaluate predictions against the ground truth and write accuracy and errors to accuracyFile
 void SentimentClassifier::evaluatePredictions(const std::string &groundTruthFile, const std::string &accuracyFile)
 {
@@ -193,22 +263,59 @@ void SentimentClassifier::evaluatePredictions(const std::string &groundTruthFile
     }
 
     std::string line;
+    size_t lineNumber = 0;
+
+    // Skip the header line if present
+    if (std::getline(infile, line))
+    {
+        lineNumber++;
+        std::vector<std::string> fields;
+        parseCSVLine(line, fields);
+        if (!fields.empty() && fields[0] == "Sentiment")
+        {
+            std::cout << "Skipping header line in ground truth data." << std::endl;
+        }
+        else
+        {
+            // If no header, reset the stream to the beginning
+            infile.clear();
+            infile.seekg(0, std::ios::beg);
+            lineNumber = 0;
+        }
+    }
+
     while (std::getline(infile, line))
     {
+        lineNumber++;
         std::vector<std::string> fields;
         parseCSVLine(line, fields);
 
         // Ensure there are at least 2 fields
         if (fields.size() < 2)
         {
+            std::cerr << "Skipping line " << lineNumber << ": Not enough fields." << std::endl;
             continue; // Skip invalid lines
         }
 
-        // Extract sentiment and tweet ID
-        int actualSentiment = std::stoi(fields[0]);
-        DSString tweetID(fields[1].c_str());
+        std::string sentimentStr = fields[0];
+        try
+        {
+            int actualSentiment = std::stoi(sentimentStr);
 
-        groundTruth[tweetID] = actualSentiment;
+            DSString tweetID(fields[1].c_str());
+
+            groundTruth[tweetID] = actualSentiment;
+        }
+        catch (const std::invalid_argument &e)
+        {
+            std::cerr << "Invalid argument on line " << lineNumber << ": Cannot convert sentiment '" << sentimentStr << "' to int." << std::endl;
+            continue;
+        }
+        catch (const std::out_of_range &e)
+        {
+            std::cerr << "Out of range error on line " << lineNumber << ": Sentiment '" << sentimentStr << "' is out of int range." << std::endl;
+            continue;
+        }
     }
 
     infile.close();
@@ -241,7 +348,7 @@ void SentimentClassifier::evaluatePredictions(const std::string &groundTruthFile
     }
 
     // Compute accuracy
-    double accuracy = static_cast<double>(correct) / total;
+    double accuracy = (total > 0) ? static_cast<double>(correct) / total : 0.0;
 
     // Write accuracy and errors to the accuracy file
     std::ofstream outfile(accuracyFile);
@@ -266,6 +373,7 @@ void SentimentClassifier::evaluatePredictions(const std::string &groundTruthFile
 
     outfile.close();
 }
+
 void SentimentClassifier::testParseCSVLine()
 {
     std::string line = R"(4,1467811594,Mon Apr 06 22:20:03 PDT 2009,NO_QUERY,peruna_pony,"Beat TCU")";
