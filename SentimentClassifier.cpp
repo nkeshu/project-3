@@ -77,7 +77,7 @@ void SentimentClassifier::train(const std::string &trainFile)
         parseCSVLine(line, fields);
         if (!fields.empty() && fields[0] == "Sentiment")
         {
-            std::cout << "Skipping header line in training data." << std::endl;
+             //skip the header line if present
         }
         else
         {
@@ -163,7 +163,7 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
         return;
     }
 
-    //open the results file
+    // Open the results file
     std::ofstream outfile(resultFile);
     if (!outfile.is_open())
     {
@@ -180,9 +180,9 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
         lineNumber++;
         std::vector<std::string> fields;
         parseCSVLine(line, fields);
-        if (!fields.empty() && (fields[0] == "TweetID" || fields[0] == "Id"))
+        if (!fields.empty() && (fields[0] == "TweetID" || fields[0] == "Id" || fields[0] == "id"))
         {
-            std::cout << "Skipping header line in test data." << std::endl;
+            //header line detected and skipped
         }
         else
         {
@@ -193,7 +193,7 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
         }
     }
 
-    // read each line from the file
+    //read each line from the file
     while (std::getline(infile, line))
     {
         lineNumber++;
@@ -203,7 +203,6 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
         //ensure there are at least 5 fields (test data has no sentiment column)
         if (fields.size() < 5)
         {
-            std::cerr << "Skipping line " << lineNumber << ": Not enough fields." << std::endl;
             continue; //skip invalid lines
         }
 
@@ -249,6 +248,7 @@ void SentimentClassifier::predict(const std::string &testFile, const std::string
 
 
 
+
 //evaluate predictions against the ground truth and write accuracy and errors to accuracyFile
 void SentimentClassifier::evaluatePredictions(const std::string &groundTruthFile, const std::string &accuracyFile)
 {
@@ -273,7 +273,7 @@ void SentimentClassifier::evaluatePredictions(const std::string &groundTruthFile
         parseCSVLine(line, fields);
         if (!fields.empty() && fields[0] == "Sentiment")
         {
-            std::cout << "Skipping header line in ground truth data." << std::endl;
+             //skip the header line if present
         }
         else
         {
