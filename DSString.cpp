@@ -1,10 +1,10 @@
-// DSString.cpp
+//DSString.cpp
 
 #include "DSString.h"
 #include <vector>
-#include <cctype> // For std::tolower
+#include <cctype> //for std::tolower
 
-// Helper function to compute the length of a C-string
+//helper function to compute the length of a C-string
 size_t my_strlen(const char *str) {
     size_t i = 0;
     while (str[i] != '\0') {
@@ -13,7 +13,7 @@ size_t my_strlen(const char *str) {
     return i;
 }
 
-// Helper function to copy a C-string
+//helper function to copy a C-string
 void my_strcpy(char *dest, const char *src) {
     size_t i = 0;
     while (src[i] != '\0') {
@@ -23,7 +23,7 @@ void my_strcpy(char *dest, const char *src) {
     dest[i] = '\0';
 }
 
-// Helper function to concatenate two C-strings
+//helper function to concatenate two C-strings
 void my_strcat(char *dest, const char *src) {
     size_t dest_len = my_strlen(dest);
     size_t i = 0;
@@ -34,7 +34,7 @@ void my_strcat(char *dest, const char *src) {
     dest[dest_len + i] = '\0';
 }
 
-// Helper function to compare two C-strings
+//helper function to compare two C-strings
 int my_strcmp(const char *str1, const char *str2) {
     size_t i = 0;
     while (str1[i] != '\0' && str2[i] != '\0') {
@@ -46,7 +46,7 @@ int my_strcmp(const char *str1, const char *str2) {
     return (unsigned char)str1[i] - (unsigned char)str2[i];
 }
 
-// Helper function to copy 'n' characters
+//helper function to copy 'n' characters
 void my_strncpy(char *dest, const char *src, size_t n) {
     size_t i = 0;
     while (i < n && src[i] != '\0') {
@@ -56,14 +56,14 @@ void my_strncpy(char *dest, const char *src, size_t n) {
     dest[i] = '\0'; // Ensure null termination
 }
 
-// Default constructor
+//default constructor
 DSString::DSString() {
     data = new char[1];
     data[0] = '\0';
     len = 0;
 }
 
-// Constructor from C-string
+//constructor from C-string
 DSString::DSString(const char *str) {
     if (str) {
         len = my_strlen(str);
@@ -76,14 +76,14 @@ DSString::DSString(const char *str) {
     }
 }
 
-// Copy constructor
+//copy constructor
 DSString::DSString(const DSString &other) {
     len = other.len;
     data = new char[len + 1];
     my_strcpy(data, other.data);
 }
 
-// Copy assignment operator
+//copy assignment operator
 DSString &DSString::operator=(const DSString &other) {
     if (this != &other) {
         delete[] data;
@@ -94,7 +94,7 @@ DSString &DSString::operator=(const DSString &other) {
     return *this;
 }
 
-// Assignment operator from C-string
+//assignment operator from C-string
 DSString &DSString::operator=(const char *str) {
     delete[] data;
     if (str) {
@@ -109,22 +109,22 @@ DSString &DSString::operator=(const char *str) {
     return *this;
 }
 
-// Destructor
+//destructor
 DSString::~DSString() {
     delete[] data;
 }
 
-// Returns the length of the string
+//returns the length of the string
 size_t DSString::length() const {
     return len;
 }
 
-// Returns a reference to the character at the given index
+//returns a reference to the character at the given index
 char &DSString::operator[](size_t index) {
     return data[index];
 }
 
-// Concatenation operator
+//concatenation operator
 DSString DSString::operator+(const DSString &other) const {
     size_t newLen = len + other.len;
     char *newData = new char[newLen + 1];
@@ -135,37 +135,37 @@ DSString DSString::operator+(const DSString &other) const {
     return result;
 }
 
-// Equality operator
+//equality operator
 bool DSString::operator==(const DSString &other) const noexcept {
     return my_strcmp(data, other.data) == 0;
 }
 
-// Less than operator
+//less than operator
 bool DSString::operator<(const DSString &other) const noexcept{
     return my_strcmp(data, other.data) < 0;
 }
 
-// Greater than operator
+//greater than operator
 bool DSString::operator>(const DSString &other) const noexcept{
     return my_strcmp(data, other.data) > 0;
 }
 
-// Not equal operator
+//not equal operator
 bool DSString::operator!=(const DSString &other) const noexcept{
     return !(*this == other);
 }
 
-// Less than or equal to operator
+//less than or equal to operator
 bool DSString::operator<=(const DSString &other) const noexcept{
     return !(*this > other);
 }
 
-// Greater than or equal to operator
+//greater than or equal to operator
 bool DSString::operator>=(const DSString &other) const noexcept{
     return !(*this < other);
 }
 
-// Substring method
+//substring method
 DSString DSString::substring(size_t start, size_t numChars) const {
     if (start >= len) {
         return DSString("");
@@ -183,7 +183,7 @@ DSString DSString::substring(size_t start, size_t numChars) const {
     return result;
 }
 
-// Converts to lowercase
+//converts to lowercase
 DSString DSString::toLower() const {
     DSString result(*this);
     for (size_t i = 0; i < len; ++i) {
@@ -192,12 +192,12 @@ DSString DSString::toLower() const {
     return result;
 }
 
-// Returns a C-string representation
+//returns a C-string representation
 const char *DSString::c_str() const noexcept{
     return data;
 }
 
-// Overloaded stream insertion operator
+//overloaded stream insertion operator
 std::ostream &operator<<(std::ostream &os, const DSString &str) {
     os << str.data;
     return os;
@@ -211,20 +211,20 @@ std::vector<DSString> DSString::split() const {
     size_t i = 0;
 
     while (i < len) {
-        // Skip leading delimiters
+        //skip leading delimiters
         while (i < len && isDelimiter(data[i])) {
             ++i;
         }
 
-        // Start of a token
+        //start of a token
         size_t start = i;
 
-        // Find the end of the token
+        //find the end of the token
         while (i < len && !isDelimiter(data[i])) {
             ++i;
         }
 
-        // Extract the token if any
+        //extract the token if any
         if (start < i) {
             DSString token = substring(start, i - start);
             tokens.push_back(token);

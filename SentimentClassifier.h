@@ -10,28 +10,28 @@
 
 class SentimentClassifier {
 private:
-    // Map to store word frequencies in positive and negative tweets
-    // Key: word (DSString), Value: pair<positive count, negative count>
+    //map to store word frequencies in positive and negative tweets
+    //key: word (DSString), Value: pair<positive count, negative count>
     std::unordered_map<DSString, std::pair<int, int>> wordFreq;
 
-    // Map to store predictions
-    // Key: tweet ID (DSString), Value: predicted sentiment (int)
+    //map to store predictions
+    //key: tweet ID (DSString), Value: predicted sentiment (int)
     std::unordered_map<DSString, int> predictions;
     void parseCSVLine(const std::string& line, std::vector<std::string>& fields);
 
 public:
-    // Constructor
+    //constructor
     SentimentClassifier();
 
-    // Train the classifier using the training data file
+    //train the classifier using the training data file
     void train(const std::string& trainFile);
 
-    // Predict sentiments for the test data and write results to resultFile
+    //predict sentiments for the test data and write results to resultFile
     void predict(const std::string& testFile, const std::string& resultFile);
 
-    // Evaluate predictions against the ground truth and write accuracy and errors to accuracyFile
+    //evaluate predictions against the ground truth and write accuracy and errors to accuracyFile
     void evaluatePredictions(const std::string& groundTruthFile, const std::string& accuracyFile);
     void testParseCSVLine();
 };
 
-#endif // SENTIMENTCLASSIFIER_H
+#endif //SENTIMENTCLASSIFIER_H
